@@ -28,7 +28,7 @@ public class ChaseState : IState
 
         if (dist > chaseRange * 1.2f)
         {
-            ai.TransitionToState(ai.patrolState);
+            ai.TransitionToState(ai.idleState);
             return;
         }
 
