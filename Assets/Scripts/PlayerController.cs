@@ -10,8 +10,8 @@ public class PlayerController : MonoBehaviour
     {
         if (Application.isPlaying)
         {
-            // print welcome message
-            Debug.Log("welcome");
+            // print Hello world
+            Debug.Log("Hello, World!");
 
         }
     }

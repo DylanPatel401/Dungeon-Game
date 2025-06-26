@@ -41,7 +41,7 @@ public class AdvancedBTAgent : MonoBehaviour
                 new HasWanderedTooLongNode(() => timeCount >= 10f),
                 new MoveToTargetNode(transform, idlePoint, 1.5f),
                 new ActionNode(() => {
-                    if (Vector3.Distance(transform.position, idlePoint.position) < 0.1f)
+                    if (Vector3.Distance(transform.position, idlePoint.position) < 0.3f)
                     {
                         reachedIdlePoint = true;
                         isWandering = false;
@@ -51,16 +51,32 @@ public class AdvancedBTAgent : MonoBehaviour
                 })
             }),
 
-            // 3. WANDER IF IDLE LONG ENOUGH
+            //// 3. WANDER IF IDLE LONG ENOUGH
+            //new SequenceNode(new List<BTNode>
+            //{
+            //    new ActionNode(() => {
+            //        bool waited = timeSinceLastPlayerSeen >= 3f && reachedIdlePoint;
+            //        Debug.Log("⏳ HasWaitedLongEnough: " + waited + $" (time={timeSinceLastPlayerSeen:F2}, idle={reachedIdlePoint})");
+            //        return waited ? NodeState.Success : NodeState.Failure;
+            //    }),
+            //    new ActionNode(() => {
+            //        isWandering = true;
+            //        Debug.Log("Wandering...");
+            //        return NodeState.Success;
+            //    }),
+            //    new WanderNode(transform, wanderPoints, 1.5f)
+            //}),
+
+             //3. WANDER IF IDLE LONG ENOUGH
             new SequenceNode(new List<BTNode>
             {
-                new ActionNode(() => {
-                    bool waited = timeSinceLastPlayerSeen >= 3f && reachedIdlePoint;
-                    Debug.Log("⏳ HasWaitedLongEnough: " + waited + $" (time={timeSinceLastPlayerSeen:F2}, idle={reachedIdlePoint})");
-                    return waited ? NodeState.Success : NodeState.Failure;
+                new HasWaitedLongEnoughNode(() => {
+                    bool waited = !IsPlayerVisible()  && reachedIdlePoint;
+                    //bool waited = !IsPlayerVisible() && ReachedIdlePoint();
+                    Debug.Log("HasWaitedLongEnough: " + waited + $" (time={timeSinceLastPlayerSeen:F2}, idle={reachedIdlePoint})");
+                    return waited;
                 }),
                 new ActionNode(() => {
-                    isWandering = true;
                     Debug.Log("Wandering...");
                     return NodeState.Success;
                 }),
@@ -99,14 +115,32 @@ public class AdvancedBTAgent : MonoBehaviour
         {
             timeSinceLastPlayerSeen += Time.deltaTime;
 
-            if (reachedIdlePoint && timeSinceLastPlayerSeen >= 3f)
-            {
-                timeCount += Time.deltaTime;
-            }
-            else
-            {
-                timeCount = 0f;
-            }
+            //if (reachedIdlePoint && timeSinceLastPlayerSeen >= 3f)
+            //{
+            //    timeCount += Time.deltaTime;
+            //}
+            //else
+            //{
+            //    timeCount = 0f;
+            //}
+        }
+
+        if (reachedIdlePoint && timeSinceLastPlayerSeen >= 3f)
+        {
+            timeCount += Time.deltaTime;
+        }
+        else
+        {
+            timeCount = 0f;
+        }
+
+        if (isWandering && timeSinceLastPlayerSeen >= 10f)
+        {
+            timeCount += Time.deltaTime;
+        }
+        else
+        {
+            timeCount = 0f;
         }
 
         if (Vector3.Distance(transform.position, idlePoint.position) < 0.1f)
@@ -124,36 +158,7 @@ public class AdvancedBTAgent : MonoBehaviour
     }
 }
 
-public class IdleNode : BTNode
-{
-    private float duration;
-    private float startTime;
-    private bool isStarted = false;
 
-    public IdleNode(float idleDuration)
-    {
-        this.duration = idleDuration;
-    }
-
-    public override NodeState Evaluate()
-    {
-        if (!isStarted)
-        {
-            startTime = Time.time;
-            isStarted = true;
-            Debug.Log("Entering idle state...");
-        }
-
-        if (Time.time - startTime >= duration)
-        {
-            isStarted = false; // Reset for next time
-            Debug.Log("Idle complete.");
-            return NodeState.Success;
-        }
-
-        return NodeState.Running;
-    }
-}
 
 
 

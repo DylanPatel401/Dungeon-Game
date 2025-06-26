@@ -66,7 +66,6 @@ public class EnemyAI : MonoBehaviour
         bool shouldChase = distanceToPlayer <= chaseRange;
         bool isChasing = currentState == chaseState;
 
-
         if (shouldChase && !isChasing)
         {
             TransitionToState(chaseState);
